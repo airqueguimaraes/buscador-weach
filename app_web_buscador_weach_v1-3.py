@@ -2,38 +2,45 @@ import streamlit as st
 from datetime import datetime, timedelta
 import urllib.parse
 
-# --- ESTRUTURA DE SITES ATUALIZADA PARA INCLUIR LOCALIZAÇÕES (v1.5) ---
+# --- ESTRUTURA DE SITES COMPLETA E ATUALIZADA (v1.5) ---
 SITES = {
     "G1": {
         "domain": "g1.globo.com",
         "locations": {
-            "Nacional": "",
-            "AC": "/ac/", "AL": "/al/", "AP": "/ap/", "AM": "/am/", "BA": "/ba/", 
-            "CE": "/ce/", "DF": "/df-distrito-federal/", "ES": "/es/", "GO": "/go/", 
-            "MA": "/ma/", "MT": "/mt/", "MS": "/ms/", "MG": "/mg/", "PA": "/pa/", 
-            "PB": "/pb/", "PR": "/pr/", "PE": "/pe/", "PI": "/pi/", "RJ": "/rj/", 
-            "RN": "/rn/", "RS": "/rs/", "RO": "/ro/", "RR": "/rr/", "SC": "/sc/", 
-            "SP": "/sp/", "SE": "/se/", "TO": "/to/"
+            "Nacional": "", "AC": "/ac/", "AL": "/al/", "AP": "/ap/", "AM": "/am/", 
+            "BA": "/ba/", "CE": "/ce/", "DF": "/df-distrito-federal/", "ES": "/es/", 
+            "GO": "/go/", "MA": "/ma/", "MT": "/mt/", "MS": "/ms/", "MG": "/mg/", 
+            "PA": "/pa/", "PB": "/pb/", "PR": "/pr/", "PE": "/pe/", "PI": "/pi/", 
+            "RJ": "/rj/", "RN": "/rn/", "RS": "/rs/", "RO": "/ro/", "RR": "/rr/", 
+            "SC": "/sc/", "SP": "/sp/", "SE": "/se/", "TO": "/to/"
         }
     },
-    "O Globo": {
-        "domain": "oglobo.globo.com",
-        "locations": { "Nacional": "" }
-    },
-    "UOL": {
-        "domain": "uol.com.br",
-        "locations": { "Nacional": "" }
-    },
-    "Estadão": {
-        "domain": "estadao.com.br",
-        "locations": { "Nacional": "" }
-    },
-    "TecMundo": {
-        "domain": "tecmundo.com.br",
-        "locations": { "Nacional": "" }
-    },
-    # Adicione outros sites aqui no mesmo formato
+    "AutoEsporte": {"domain": "autoesporte.globo.com", "locations": {"Nacional": ""}},
+    "Campo Grande News": {"domain": "campograndenews.com.br", "locations": {"Nacional": ""}},
+    "Caras": {"domain": "caras.com.br", "locations": {"Nacional": ""}},
+    "CNN Brasil": {"domain": "cnnbrasil.com.br", "locations": {"Nacional": ""}},
+    "Época Negócios": {"domain": "epocanegocios.globo.com", "locations": {"Nacional": ""}},
+    "Estadão": {"domain": "estadao.com.br", "locations": {"Nacional": ""}},
+    "Exame": {"domain": "exame.com", "locations": {"Nacional": ""}},
+    "Gazeta de S. Paulo": {"domain": "gazetasp.com.br", "locations": {"Nacional": ""}},
+    "Globo Rural": {"domain": "globorural.globo.com", "locations": {"Nacional": ""}},
+    "Globo.com": {"domain": "globo.com", "locations": {"Nacional": ""}},
+    "IGN Brasil": {"domain": "ign.com", "locations": {"Nacional": ""}},
+    "IstoÉ": {"domain": "istoe.com.br", "locations": {"Nacional": ""}},
+    "IstoÉ Dinheiro": {"domain": "istoedinheiro.com.br", "locations": {"Nacional": ""}},
+    "MSN": {"domain": "msn.com", "locations": {"Nacional": ""}},
+    "Notícias Automotivas": {"domain": "noticiasautomotivas.com.br", "locations": {"Nacional": ""}},
+    "O Globo": {"domain": "oglobo.globo.com", "locations": {"Nacional": ""}},
+    "Olhar Digital": {"domain": "olhardigital.com.br", "locations": {"Nacional": ""}},
+    "Quatro Rodas": {"domain": "quatrorodas.abril.com.br", "locations": {"Nacional": ""}},
+    "Radios.com.br": {"domain": "radios.com.br", "locations": {"Nacional": ""}},
+    "Só Notícia Boa": {"domain": "sonoticiaboa.com.br", "locations": {"Nacional": ""}},
+    "TecMundo": {"domain": "tecmundo.com.br", "locations": {"Nacional": ""}},
+    "Tempo.com": {"domain": "tempo.com", "locations": {"Nacional": ""}},
+    "UOL": {"domain": "uol.com.br", "locations": {"Nacional": ""}},
+    "Valor Econômico": {"domain": "valor.globo.com", "locations": {"Nacional": ""}}
 }
+
 
 TEMAS = [
     "Qualquer Tema", "Alimento", "Bem-estar", "Carreira", "Carro", "Casa & Decoração",
@@ -73,10 +80,7 @@ with col2:
 # --- NOVO SELETOR DE LOCALIZAÇÃO (COLUNA 3) ---
 with col3:
     st.markdown("<h6>Selecione a Localização:</h6>", unsafe_allow_html=True)
-    # Pega as localizações disponíveis para o site selecionado
     opcoes_localizacao = SITES[site_selecionado].get("locations", {})
-    
-    # Desabilita o menu se não houver opções de localização (além de "Nacional")
     desabilitar_localizacao = len(opcoes_localizacao) <= 1
     
     localizacao_selecionada = st.selectbox(
@@ -96,8 +100,6 @@ st.write("")
 # --- LÓGICA DO BOTÃO ATUALIZADA ---
 if st.button("Achar Minha Notícia no Google", type="primary", use_container_width=True):
     base_domain = SITES[site_selecionado]["domain"]
-    
-    # Adiciona o caminho da localização ao domínio, se aplicável
     location_path = SITES[site_selecionado].get("locations", {}).get(localizacao_selecionada, "")
     dominio_completo = base_domain + location_path
     
