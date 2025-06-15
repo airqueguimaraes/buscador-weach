@@ -48,8 +48,6 @@ TEMAS = [
     "Sustentabilidade", "Tecnologia", "Viagem"
 ]
 
-# A lista de palavras sensíveis foi removida.
-
 # --- INTERFACE DO SITE COM STREAMLIT ---
 
 st.set_page_config(page_title="Buscador Weach", layout="wide")
@@ -83,4 +81,49 @@ with col3:
 
 with col4:
     st.markdown("<h6>Selecione o Tema:</h6>", unsafe_allow_html=True)
-    tema_selecionado = st.selectbox("Tema", options=TEMAS, label_visibility="
+    # --- LINHA CORRIGIDA ---
+    tema_selecionado = st.selectbox("Tema", options=TEMAS, label_visibility="collapsed")
+
+st.write("---") 
+
+col_btn1, col_btn2, col_btn3 = st.columns([1, 2, 1])
+
+with col_btn2:
+    if st.button("Achar Minha Notícia no Google", use_container_width=True):
+        base_domain = SITES[site_selecionado]["domain"]
+        location_path = SITES[site_selecionado].get("locations", {}).get(localizacao_selecionada, "")
+        dominio_completo = base_domain + location_path
+        
+        data_selecionada = datetime(int(ano_selecionado), int(mes_selecionado), int(dia_selecionado))
+        data_anterior = data_selecionada - timedelta(days=1)
+        data_posterior = data_selecionada + timedelta(days=1)
+        after_str = data_anterior.strftime('%Y-%m-%d')
+        before_str = data_posterior.strftime('%Y-%m-%d')
+        
+        partes_da_busca = [f"site:{dominio_completo}", f"after:{after_str}", f"before:{before_str}"]
+        if tema_selecionado != "Qualquer Tema":
+            partes_da_busca.append(f'"{tema_selecionado}"')
+            
+        query_final = " ".join(partes_da_busca)
+        url_google = f"https://www.google.com/search?q={urllib.parse.quote_plus(query_final)}"
+        
+        link_markdown = f"<a href='{url_google}' target='_blank' style='display: block; padding: 11px 20px; background-color: #fbbc07; color: #021850; text-align: center; text-decoration: none; font-weight: bold; border-radius: 5px;'>✔️ Clique aqui para ver os resultados da busca</a>"
+        st.markdown(link_markdown, unsafe_allow_html=True)
+
+# CSS para o estilo do botão (Normal e Hover)
+st.markdown("""
+<style>
+    .stButton > button {
+        border: 2px solid #021850;
+        background-color: #021850;
+        color: #ffffff;
+        font-weight: bold;
+    }
+    
+    .stButton > button:hover {
+        border: 2px solid #fbbc07;
+        background-color: #fbbc07;
+        color: #021850;
+    }
+</style>
+""", unsafe_allow_html=True)
