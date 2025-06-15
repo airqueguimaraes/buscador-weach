@@ -1,6 +1,6 @@
 [theme]
 primaryColor="#fbbc07"
-backgroundColor="#000000"
+backgroundColor="#262730"  # <-- Cor alterada aqui
 secondaryBackgroundColor="#011950"
 textColor="#FFFFFF"
 font="sans serif"
