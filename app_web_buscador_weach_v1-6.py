@@ -2,7 +2,7 @@ import streamlit as st
 from datetime import datetime, timedelta
 import urllib.parse
 
-# --- ESTRUTURA DE SITES COMPLETA E ATUALIZADA (v1.5) ---
+# --- CONFIGURAÇÕES ---
 SITES = {
     "G1": {
         "domain": "g1.globo.com",
@@ -41,7 +41,6 @@ SITES = {
     "Valor Econômico": {"domain": "valor.globo.com", "locations": {"Nacional": ""}}
 }
 
-
 TEMAS = [
     "Qualquer Tema", "Alimento", "Bem-estar", "Carreira", "Carro", "Casa & Decoração",
     "Ciência", "Cultura", "Dinheiro", "Educação", "Empreendedorismo", "Esportes",
@@ -49,15 +48,23 @@ TEMAS = [
     "Sustentabilidade", "Tecnologia", "Viagem"
 ]
 
+# --- NOVA LISTA DE PALAVRAS SENSÍVEIS (v1.6) ---
+# Sinta-se à vontade para editar esta lista, adicionando ou removendo palavras.
+PALAVRAS_SENSIVEIS = [
+    "morte", "morre", "morreu", "assassinato", "assassinado", "crime", "homicídio", 
+    "latrocínio", "estupro", "abuso", "sequestro", "tragédia", "acidente", "fatal", 
+    "vítima", "corpo", "sangue", "ferido", "polícia", "operação", "investigação", 
+    "corrupção", "escândalo", "suicídio", "desastre", "condenado", "preso"
+]
+
+
 # --- INTERFACE DO SITE COM STREAMLIT ---
 
 st.set_page_config(page_title="Buscador Weach", layout="wide")
 st.markdown("<h1 style='text-align: center;'>Buscador de Notícias Weach</h1>", unsafe_allow_html=True)
 
-# Organiza os seletores em colunas
 col1, col2, col3, col4 = st.columns(4, gap="large")
 
-# --- SELETOR DE DATA (COLUNA 1) ---
 with col1:
     st.markdown("<h6>Selecione a Data:</h6>", unsafe_allow_html=True)
     dias = [str(d).zfill(2) for d in range(1, 32)]
@@ -71,31 +78,27 @@ with col1:
     with sub_col3:
         ano_selecionado = st.selectbox("Ano", options=anos, label_visibility="collapsed")
 
-# --- SELETOR DE SITE (COLUNA 2) ---
 with col2:
     st.markdown("<h6>Selecione o Site:</h6>", unsafe_allow_html=True)
     lista_de_sites_ordenada = sorted(SITES.keys())
     site_selecionado = st.selectbox("Site", options=lista_de_sites_ordenada, label_visibility="collapsed")
 
-# --- NOVO SELETOR DE LOCALIZAÇÃO (COLUNA 3) ---
 with col3:
     st.markdown("<h6>Selecione a Localização:</h6>", unsafe_allow_html=True)
     opcoes_localizacao = SITES[site_selecionado].get("locations", {})
     desabilitar_localizacao = len(opcoes_localizacao) <= 1
-    
-    localizacao_selecionada = st.selectbox(
-        "Localização", 
-        options=opcoes_localizacao.keys(), 
-        label_visibility="collapsed",
-        disabled=desabilitar_localizacao
-    )
+    localizacao_selecionada = st.selectbox("Localização", options=opcoes_localizacao.keys(), label_visibility="collapsed", disabled=desabilitar_localizacao)
 
-# --- SELETOR DE TEMA (COLUNA 4) ---
 with col4:
     st.markdown("<h6>Selecione o Tema:</h6>", unsafe_allow_html=True)
     tema_selecionado = st.selectbox("Tema", options=TEMAS, label_visibility="collapsed")
 
-st.write("") 
+st.write("---") # Linha divisória
+
+# --- NOVA CAIXA DE SELEÇÃO DE BRAND SAFETY (v1.6) ---
+evitar_sensiveis = st.checkbox("✔️ Marcar para ativar o filtro de Brand Safety (evitar notícias com palavras sensíveis)")
+
+st.write("---")
 
 # --- LÓGICA DO BOTÃO ATUALIZADA ---
 if st.button("Achar Minha Notícia no Google", type="primary", use_container_width=True):
@@ -112,6 +115,11 @@ if st.button("Achar Minha Notícia no Google", type="primary", use_container_wid
     partes_da_busca = [f"site:{dominio_completo}", f"after:{after_str}", f"before:{before_str}"]
     if tema_selecionado != "Qualquer Tema":
         partes_da_busca.append(f'"{tema_selecionado}"')
+    
+    # --- NOVA LÓGICA DO FILTRO DE BRAND SAFETY (v1.6) ---
+    if evitar_sensiveis:
+        termos_negativos = " ".join([f"-{palavra}" for palavra in PALAVRAS_SENSIVEIS])
+        partes_da_busca.append(termos_negativos)
         
     query_final = " ".join(partes_da_busca)
     url_google = f"https://www.google.com/search?q={urllib.parse.quote_plus(query_final)}"
