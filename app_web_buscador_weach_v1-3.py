@@ -92,7 +92,7 @@ with col4:
 
 st.write("---") 
 
-evitar_sensiveis = st.checkbox("✔️ Marcar para ativar o filtro de Brand Safety (evitar notícias com palavras sensíveis)")
+evitar_sensiveis = st.checkbox("Marcar para ativar o filtro de Brand Safety (evitar notícias com palavras sensíveis)")
 
 st.write("---")
 
