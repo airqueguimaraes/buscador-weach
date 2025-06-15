@@ -1,6 +1,7 @@
 import streamlit as st
 from datetime import datetime, timedelta
 import urllib.parse
+st.success("TESTE DE ATUALIZAÇÃO v1.6 FUNCIONOU!")
 
 # --- CONFIGURAÇÕES ---
 SITES = {
