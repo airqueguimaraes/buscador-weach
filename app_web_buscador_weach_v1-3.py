@@ -56,14 +56,18 @@ PALAVRAS_SENSIVEIS = [
 ]
 
 # --- INTERFACE DO SITE COM STREAMLIT ---
-
 st.set_page_config(page_title="Buscador Weach", layout="wide")
 st.markdown("<h1 style='text-align: center; color: #fbbc07;'>Buscador de Notícias Weach</h1>", unsafe_allow_html=True)
 
-col1, col2, col3, col4 = st.columns(4, gap="large")
+# Armazena os parâmetros da busca no estado da sessão para que não se percam
+if 'params' not in st.session_state:
+    st.session_state.params = {}
 
+# --- Lógica dos Seletores ---
+col1, col2, col3, col4 = st.columns(4, gap="large")
 with col1:
     st.markdown("<h6>Selecione a Data:</h6>", unsafe_allow_html=True)
+    # ... (código dos seletores de data) ...
     dias = [str(d).zfill(2) for d in range(1, 32)]
     meses = [str(m).zfill(2) for m in range(1, 13)]
     anos = [str(y) for y in range(datetime.now().year, datetime.now().year - 10, -1)]
@@ -74,72 +78,57 @@ with col1:
         mes_selecionado = st.selectbox("Mês", options=meses, index=datetime.now().month - 1, label_visibility="collapsed")
     with sub_col3:
         ano_selecionado = st.selectbox("Ano", options=anos, label_visibility="collapsed")
-
 with col2:
     st.markdown("<h6>Selecione o Site:</h6>", unsafe_allow_html=True)
-    lista_de_sites_ordenada = sorted(SITES.keys())
-    site_selecionado = st.selectbox("Site", options=lista_de_sites_ordenada, label_visibility="collapsed")
-
+    site_selecionado = st.selectbox("Site", options=sorted(SITES.keys()), label_visibility="collapsed")
 with col3:
     st.markdown("<h6>Selecione a Localização:</h6>", unsafe_allow_html=True)
     opcoes_localizacao = SITES[site_selecionado].get("locations", {})
-    desabilitar_localizacao = len(opcoes_localizacao) <= 1
-    localizacao_selecionada = st.selectbox("Localização", options=opcoes_localizacao.keys(), label_visibility="collapsed", disabled=desabilitar_localizacao)
-
+    localizacao_selecionada = st.selectbox("Localização", options=opcoes_localizacao.keys(), label_visibility="collapsed", disabled=len(opcoes_localizacao) <= 1)
 with col4:
     st.markdown("<h6>Selecione o Tema:</h6>", unsafe_allow_html=True)
     tema_selecionado = st.selectbox("Tema", options=TEMAS, label_visibility="collapsed")
 
-st.write("---") 
-
-evitar_sensiveis = st.checkbox("Marcar para ativar o filtro de Brand Safety (evitar notícias com palavras sensíveis)")
-
 st.write("---")
 
-col_btn1, col_btn2, col_btn3 = st.columns([1, 2, 1])
+# --- BOTÃO PRINCIPAL E LÓGICA DE GERAÇÃO DE LINKS ---
+if st.button("Gerar Links de Busca", type="primary", use_container_width=True):
+    # Salva os parâmetros atuais para serem usados pelos links
+    st.session_state.params = {
+        "site": site_selecionado,
+        "local": localizacao_selecionada,
+        "data": datetime(int(ano_selecionado), int(mes_selecionado), int(dia_selecionado)),
+        "tema": tema_selecionado
+    }
 
-with col_btn2:
-    if st.button("Achar Minha Notícia no Google", use_container_width=True):
-        base_domain = SITES[site_selecionado]["domain"]
-        location_path = SITES[site_selecionado].get("locations", {}).get(localizacao_selecionada, "")
+# --- EXIBIÇÃO DOS LINKS DE RESULTADO (SE OS PARÂMETROS EXISTIREM) ---
+if 'params' in st.session_state and st.session_state.params:
+    params = st.session_state.params
+    
+    # Função interna para criar as URLs
+    def criar_url(com_filtro_bs):
+        base_domain = SITES[params["site"]]["domain"]
+        location_path = SITES[params["site"]].get("locations", {}).get(params["local"], "")
         dominio_completo = base_domain + location_path
         
-        data_selecionada = datetime(int(ano_selecionado), int(mes_selecionado), int(dia_selecionado))
-        data_anterior = data_selecionada - timedelta(days=1)
-        data_posterior = data_selecionada + timedelta(days=1)
+        data_anterior = params["data"] - timedelta(days=1)
+        data_posterior = params["data"] + timedelta(days=1)
         after_str = data_anterior.strftime('%Y-%m-%d')
         before_str = data_posterior.strftime('%Y-%m-%d')
         
         partes_da_busca = [f"site:{dominio_completo}", f"after:{after_str}", f"before:{before_str}"]
-        if tema_selecionado != "Qualquer Tema":
-            partes_da_busca.append(f'"{tema_selecionado}"')
-        
-        if evitar_sensiveis:
+        if params["tema"] != "Qualquer Tema":
+            partes_da_busca.append(f'"{params["tema"]}"')
+        if com_filtro_bs:
             termos_negativos = " ".join([f"-{palavra}" for palavra in PALAVRAS_SENSIVEIS])
             partes_da_busca.append(termos_negativos)
             
-        query_final = " ".join(partes_da_busca)
-        url_google = f"https://www.google.com/search?q={urllib.parse.quote_plus(query_final)}"
-        
-        link_markdown = f"<a href='{url_google}' target='_blank' style='display: inline-block; padding: 11px 20px; background-color: #fbbc07; color: #021850; text-align: center; text-decoration: none; font-weight: bold; border-radius: 5px;'>✔️ Clique aqui para ver os resultados da busca</a>"
-        st.markdown(link_markdown, unsafe_allow_html=True)
+        return f"https://www.google.com/search?q={urllib.parse.quote_plus(' '.join(partes_da_busca))}"
 
-# --- CSS CUSTOMIZADO PARA O ESTILO EXATO DO BOTÃO ---
-st.markdown("""
-<style>
-    /* Seleciona o botão dentro do container do Streamlit */
-    .stButton > button {
-        border: 2px solid #021850;
-        background-color: #021850;
-        color: #ffffff;
-        font-weight: bold;
-    }
+    url_normal = criar_url(com_filtro_bs=False)
+    url_segura = criar_url(com_filtro_bs=True)
     
-    /* Define o estilo QUANDO O MOUSE PASSA POR CIMA (hover) */
-    .stButton > button:hover {
-        border: 2px solid #fbbc07;
-        background-color: #fbbc07;
-        color: #021850;
-    }
-</style>
-""", unsafe_allow_html=True)
+    st.markdown("---")
+    st.markdown(f"<a href='{url_normal}' target='_blank' style='display: block; padding: 11px 20px; background-color: #021850; color: #ffffff; text-align: center; text-decoration: none; font-weight: bold; border-radius: 5px; margin-bottom: 10px;'>✔️ 1. Ver Resultados Gerais</a>", unsafe_allow_html=True)
+    st.markdown(f"<a href='{url_segura}' target='_blank' style='display: block; padding: 11px 20px; background-color: #fbbc07; color: #021850; text-align: center; text-decoration: none; font-weight: bold; border-radius: 5px;'>🛡️ 2. Ver Resultados com Filtro de Brand Safety</a>", unsafe_allow_html=True)
+    st.caption("Primeiro, clique nos Resultados Gerais. Se encontrar muitas notícias sensíveis, use o segundo link para aplicar o filtro.")
