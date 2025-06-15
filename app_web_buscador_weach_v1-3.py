@@ -1,7 +1,6 @@
 import streamlit as st
 from datetime import datetime, timedelta
 import urllib.parse
-st.success("TESTE DE ATUALIZAÇÃO v1.6 FUNCIONOU!")
 
 # --- CONFIGURAÇÕES ---
 SITES = {
@@ -49,15 +48,12 @@ TEMAS = [
     "Sustentabilidade", "Tecnologia", "Viagem"
 ]
 
-# --- NOVA LISTA DE PALAVRAS SENSÍVEIS (v1.6) ---
-# Sinta-se à vontade para editar esta lista, adicionando ou removendo palavras.
 PALAVRAS_SENSIVEIS = [
     "morte", "morre", "morreu", "assassinato", "assassinado", "crime", "homicídio", 
     "latrocínio", "estupro", "abuso", "sequestro", "tragédia", "acidente", "fatal", 
     "vítima", "corpo", "sangue", "ferido", "polícia", "operação", "investigação", 
     "corrupção", "escândalo", "suicídio", "desastre", "condenado", "preso"
 ]
-
 
 # --- INTERFACE DO SITE COM STREAMLIT ---
 
@@ -94,14 +90,12 @@ with col4:
     st.markdown("<h6>Selecione o Tema:</h6>", unsafe_allow_html=True)
     tema_selecionado = st.selectbox("Tema", options=TEMAS, label_visibility="collapsed")
 
-st.write("---") # Linha divisória
+st.write("---") 
 
-# --- NOVA CAIXA DE SELEÇÃO DE BRAND SAFETY (v1.6) ---
 evitar_sensiveis = st.checkbox("✔️ Marcar para ativar o filtro de Brand Safety (evitar notícias com palavras sensíveis)")
 
 st.write("---")
 
-# --- LÓGICA DO BOTÃO ATUALIZADA ---
 if st.button("Achar Minha Notícia no Google", type="primary", use_container_width=True):
     base_domain = SITES[site_selecionado]["domain"]
     location_path = SITES[site_selecionado].get("locations", {}).get(localizacao_selecionada, "")
@@ -117,7 +111,6 @@ if st.button("Achar Minha Notícia no Google", type="primary", use_container_wid
     if tema_selecionado != "Qualquer Tema":
         partes_da_busca.append(f'"{tema_selecionado}"')
     
-    # --- NOVA LÓGICA DO FILTRO DE BRAND SAFETY (v1.6) ---
     if evitar_sensiveis:
         termos_negativos = " ".join([f"-{palavra}" for palavra in PALAVRAS_SENSIVEIS])
         partes_da_busca.append(termos_negativos)
