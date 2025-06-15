@@ -121,17 +121,25 @@ with col_btn2:
         query_final = " ".join(partes_da_busca)
         url_google = f"https://www.google.com/search?q={urllib.parse.quote_plus(query_final)}"
         
-        link_markdown = f"<a href='{url_google}' target='_blank' style='display: inline-block; padding: 11px 20px; background-color: #fbbc07; color: #000000; text-align: center; text-decoration: none; font-weight: bold; border-radius: 5px;'>✔️ Clique aqui para ver os resultados da busca</a>"
+        link_markdown = f"<a href='{url_google}' target='_blank' style='display: inline-block; padding: 11px 20px; background-color: #fbbc07; color: #021850; text-align: center; text-decoration: none; font-weight: bold; border-radius: 5px;'>✔️ Clique aqui para ver os resultados da busca</a>"
         st.markdown(link_markdown, unsafe_allow_html=True)
 
-# --- CSS CUSTOMIZADO COM A COR DO TEXTO CORRIGIDA ---
+# --- CSS CUSTOMIZADO PARA O ESTILO EXATO DO BOTÃO ---
 st.markdown("""
 <style>
-    /* O fundo do botão já é #fbbc07 por causa do config.toml */
-    /* Aqui, alteramos apenas a cor do texto para o azul #021850 */
+    /* Seleciona o botão dentro do container do Streamlit */
     .stButton > button {
-        color: #021850;
+        border: 2px solid #021850;
+        background-color: #021850;
+        color: #ffffff;
         font-weight: bold;
+    }
+    
+    /* Define o estilo QUANDO O MOUSE PASSA POR CIMA (hover) */
+    .stButton > button:hover {
+        border: 2px solid #fbbc07;
+        background-color: #fbbc07;
+        color: #021850;
     }
 </style>
 """, unsafe_allow_html=True)
