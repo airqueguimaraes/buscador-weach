@@ -58,7 +58,7 @@ PALAVRAS_SENSIVEIS = [
 # --- INTERFACE DO SITE COM STREAMLIT ---
 
 st.set_page_config(page_title="Buscador Weach", layout="wide")
-st.markdown("<h1 style='text-align: center;'>Buscador de Notícias Weach</h1>", unsafe_allow_html=True)
+st.markdown("<h1 style='text-align: center; color: #fbbc07;'>Buscador de Notícias Weach</h1>", unsafe_allow_html=True)
 
 col1, col2, col3, col4 = st.columns(4, gap="large")
 
@@ -96,27 +96,42 @@ evitar_sensiveis = st.checkbox("✔️ Marcar para ativar o filtro de Brand Safe
 
 st.write("---")
 
-if st.button("Achar Minha Notícia no Google", type="primary", use_container_width=True):
-    base_domain = SITES[site_selecionado]["domain"]
-    location_path = SITES[site_selecionado].get("locations", {}).get(localizacao_selecionada, "")
-    dominio_completo = base_domain + location_path
-    
-    data_selecionada = datetime(int(ano_selecionado), int(mes_selecionado), int(dia_selecionado))
-    data_anterior = data_selecionada - timedelta(days=1)
-    data_posterior = data_selecionada + timedelta(days=1)
-    after_str = data_anterior.strftime('%Y-%m-%d')
-    before_str = data_posterior.strftime('%Y-%m-%d')
-    
-    partes_da_busca = [f"site:{dominio_completo}", f"after:{after_str}", f"before:{before_str}"]
-    if tema_selecionado != "Qualquer Tema":
-        partes_da_busca.append(f'"{tema_selecionado}"')
-    
-    if evitar_sensiveis:
-        termos_negativos = " ".join([f"-{palavra}" for palavra in PALAVRAS_SENSIVEIS])
-        partes_da_busca.append(termos_negativos)
+col_btn1, col_btn2, col_btn3 = st.columns([1, 2, 1])
+
+with col_btn2:
+    if st.button("Achar Minha Notícia no Google", use_container_width=True):
+        base_domain = SITES[site_selecionado]["domain"]
+        location_path = SITES[site_selecionado].get("locations", {}).get(localizacao_selecionada, "")
+        dominio_completo = base_domain + location_path
         
-    query_final = " ".join(partes_da_busca)
-    url_google = f"https://www.google.com/search?q={urllib.parse.quote_plus(query_final)}"
-    
-    link_markdown = f"<a href='{url_google}' target='_blank' style='display: inline-block; padding: 11px 20px; background-color: #fbbc07; color: #000000; text-align: center; text-decoration: none; font-weight: bold; border-radius: 5px;'>✔️ Clique aqui para ver os resultados da busca</a>"
-    st.markdown(link_markdown, unsafe_allow_html=True)
+        data_selecionada = datetime(int(ano_selecionado), int(mes_selecionado), int(dia_selecionado))
+        data_anterior = data_selecionada - timedelta(days=1)
+        data_posterior = data_selecionada + timedelta(days=1)
+        after_str = data_anterior.strftime('%Y-%m-%d')
+        before_str = data_posterior.strftime('%Y-%m-%d')
+        
+        partes_da_busca = [f"site:{dominio_completo}", f"after:{after_str}", f"before:{before_str}"]
+        if tema_selecionado != "Qualquer Tema":
+            partes_da_busca.append(f'"{tema_selecionado}"')
+        
+        if evitar_sensiveis:
+            termos_negativos = " ".join([f"-{palavra}" for palavra in PALAVRAS_SENSIVEIS])
+            partes_da_busca.append(termos_negativos)
+            
+        query_final = " ".join(partes_da_busca)
+        url_google = f"https://www.google.com/search?q={urllib.parse.quote_plus(query_final)}"
+        
+        link_markdown = f"<a href='{url_google}' target='_blank' style='display: inline-block; padding: 11px 20px; background-color: #fbbc07; color: #000000; text-align: center; text-decoration: none; font-weight: bold; border-radius: 5px;'>✔️ Clique aqui para ver os resultados da busca</a>"
+        st.markdown(link_markdown, unsafe_allow_html=True)
+
+# --- CSS CUSTOMIZADO COM A COR DO TEXTO CORRIGIDA ---
+st.markdown("""
+<style>
+    /* O fundo do botão já é #fbbc07 por causa do config.toml */
+    /* Aqui, alteramos apenas a cor do texto para o azul #021850 */
+    .stButton > button {
+        color: #021850;
+        font-weight: bold;
+    }
+</style>
+""", unsafe_allow_html=True)
